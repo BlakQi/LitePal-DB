@@ -3,10 +3,10 @@ name: Android CI
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - '*'  # 触发条件，包括所有标签
   pull_request:
     branches: [ "main" ]
-  release:
-    types: [ created ]  # 当创建新的 release 时触发
 
 jobs:
   build:
