@@ -31,8 +31,8 @@ jobs:
           name: gzandea-db-jar
           path: core/build/libs/gzandea-db.jar
 
-  release:
-    name: Create Release and Upload JAR
+  upload-release-asset:
+    name: Upload JAR to Existing Release
     runs-on: ubuntu-latest
     needs: build  # 确保在 build 完成后执行
 
@@ -42,21 +42,20 @@ jobs:
         with:
           name: gzandea-db-jar  # 确保这个名称与上传时一致
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1.1.4  # 使用适合的版本
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}  # 使用推送的 tag 作为 release 的 tag 名
-          release_name: Release ${{ github.ref }}  # Release 名字
+      - name: Get release ID
+        id: get_release
+        run: |
+          TAG_NAME="${{ github.ref }}"
+          API_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG_NAME#refs/tags/}"
+          RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$API_URL")
+          echo "Response: $RESPONSE"
+          echo "::set-output name=release_id::$(echo $RESPONSE | jq '.id')"
+          echo "::set-output name=upload_url::$(echo $RESPONSE | jq -r '.upload_url' | sed 's/{?name,label}//')"
 
-      - name: Upload Release JAR
-        uses: actions/upload-release-asset@v1.0.1  # 使用适合的版本
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./gzandea-db.jar  # 确保下载的路径正确
-          asset_name: gzandea-db-${{ github.ref }}.jar  # 根据 tag 生成文件名
-          asset_content_type: application/java-archive
+      - name: Upload Release Asset
+        if: steps.get_release.outputs.release_id != 'null'
+        run: |
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/java-archive" \
+          --data-binary @core/build/libs/gzandea-db.jar \
+          "${{ steps.get_release.outputs.upload_url }}?name=gzandea-db-${{ github.ref }}.jar"
