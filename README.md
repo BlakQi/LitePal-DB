@@ -1,2 +1,1 @@
-# LitePal-DB
-LitePal-DB
+adb pull /storage/emulated/0/android/data/com.gzandea.lsg630/files/andealog/2024-09-27.txt C:\123555.txt

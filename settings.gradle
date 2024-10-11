@@ -1,0 +1,4 @@
+//include ':library-api'//, ':library-network'//,  ':library-encryption'
+include ':app' ,  ':library-resolvinglsg630'//, ':core'
+//include ':library-dh-camera' ':serialport',
+//include ':andea-socket',':andea-core',':andea-serialport'

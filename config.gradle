@@ -1,0 +1,99 @@
+//版本号存储在version.properties，每次编译版本自增加1
+def getVersionCodes() {
+    def versionCodeFile = file('version.properties')
+    if (versionCodeFile.canRead()) {
+        Properties properties = new Properties()
+        properties.load(new FileInputStream(versionCodeFile))
+        def versionCode = properties['VERSION_CODE'].toInteger()
+//        def version_release_code = properties['VERSION_RELEASE_CODE'].toInteger()
+        def runTasks = gradle.startParameter.taskNames
+//        def taska = ':app:assembleGZAndeaDebug'
+        def task = ':app:assembleGZAndeaDebug'
+        if (task in runTasks) {
+            properties['VERSION_CODE'] = (++versionCode).toString()
+            properties.store(versionCodeFile.newWriter(), null)
+        }
+
+        return versionCode
+    } else {
+        throw new GradleException("无法读取version.properties文件！")
+    }
+}
+//版本号存储在version.properties，每次编译版本自增加1
+def getVersionReleaseCodes() {
+    def versionCodeFile = file('version.properties')
+    if (versionCodeFile.canRead()) {
+        Properties properties = new Properties()
+        properties.load(new FileInputStream(versionCodeFile))
+        def version_release_code = properties['VERSION_RELEASE_CODE'].toInteger()
+        def runTasks = gradle.startParameter.taskNames
+        def taska = ':app:assembleGZAndeaRelease'
+        if (taska in runTasks) {
+            properties['VERSION_RELEASE_CODE'] = (++version_release_code).toString()
+            properties.store(versionCodeFile.newWriter(), null)
+        }
+        return version_release_code
+    } else {
+        throw new GradleException("无法读取version.properties文件！")
+    }
+}
+ext {
+
+    def versionInts = getVersionCodes()
+    def customizedint = 21 //定制版本 20 标准 21 吊顶
+    def versionReleaseint = getVersionReleaseCodes() //BUG 优化增加
+    def versionint = 623 //大版本增加
+    def versionCodes = customizedint * 10000000 + versionint * 10000  + versionInts
+    def versionNames = customizedint + "." + versionint + "." + versionReleaseint + "." + versionInts
+
+
+    android = [
+            compileSdkVersion: 29,
+            buildToolsVersion: "29.0.3",
+            minSdkVersion    : 21,
+            applicationId    : "com.gzandea.lsg630",
+            targetSdkVersion : 29,
+            versionCode      : versionCodes,
+            versionName      : versionNames,
+            schemaversion    : 22,//数据库版本号
+            mavenurl         : 'http://192.168.50.214/repository/android-maven-releases/',
+            mavenUserName    : 'andea-dev',
+            mavenPassWord    : 'dev@Andea#',
+    ]
+
+    //version配置
+    versions = [
+            "support-version": "28.0.3",
+            "junit-version"  : "4.12",
+    ]
+
+    isEnableLog = [
+            "debug": false,
+            "release": false
+    ]
+
+    //support配置
+    support = [
+            "constraint-layout"       : "1.0.0-beta2",
+            'support-v4'              : 'androidx.legacy:legacy-support-v4:1.0.0',
+            'appcompat-v7'            : 'androidx.appcompat:appcompat:1.3.0',
+            'recyclerview-v7'         : 'androidx.recyclerview:recyclerview:1.0.0',
+            'support-v13'             : "com.android.support:support-v13:${versions["support-version"]}",
+            'support-fragment'        : "com.android.support:support-fragment:${versions["support-version"]}",
+            'design'                  : 'com.google.android.material:material:1.0.0',
+            'animated-vector-drawable': "com.android.support:animated-vector-drawable:${versions["support-version"]}",
+            'junit'                   : "junit:junit:${versions["junit-version"]}",
+            "constraint-layout:2.0.1" : "com.android.support.constraint:constraint-layout:2.0.1",
+            "multidex"                : 'androidx.multidex:multidex:2.0.0',
+    ]
+
+    //依赖第三方配置
+    dependencies = [
+
+             "debug-db"                            : "com.amitshekhar.android:debug-db:1.0.6",
+            "andea-socket"                         : "com.gzandea.exit:andea-socket:1.0.12",
+
+    ]
+}
+
+
