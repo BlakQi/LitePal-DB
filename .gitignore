@@ -4,7 +4,7 @@
 *.iml
 .gradle
 /.settings
-/gradle
+
 .idea
 /.idea
 /intermediates
