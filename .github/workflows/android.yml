@@ -25,6 +25,31 @@ jobs:
       - name: Build JAR in core module
         run: ./gradlew :core:build
 
+      - name: Get Release ID if exists
+        id: get_release_id
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const tagName = context.ref.replace('refs/tags/', '');
+            const releases = await github.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const existingRelease = releases.data.find(release => release.tag_name === tagName);
+            return existingRelease ? existingRelease.id : null;
+
+      - name: Delete Existing Release
+        if: steps.get_release_id.outputs.result != null
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const releaseId = ${{ steps.get_release_id.outputs.result }};
+            await github.repos.deleteRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: releaseId,
+            });
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
