@@ -25,12 +25,28 @@ jobs:
       - name: Build and create JAR in core module
         run: ./gradlew :core:aamakeJar
 
+      - name: Check if JAR file exists
+        run: |
+          if [ -f core/build/libs/gzandea-db.jar ]; then
+            echo "JAR file exists."
+          else
+            echo "JAR file does not exist."
+            exit 1
+          fi
+
+      - name: List contents of JAR file
+        run: |
+          if [ -f core/build/libs/gzandea-db.jar ]; then
+            jar tf core/build/libs/gzandea-db.jar
+          else
+            echo "JAR file does not exist."
+          fi
+
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4  # 使用最新的 v4 版本
         with:
           name: gzandea-db-jar
           path: core/build/libs/gzandea-db.jar
-
 
   upload-release-asset:
     name: Upload JAR to Existing Release
