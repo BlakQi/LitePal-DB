@@ -31,6 +31,7 @@ jobs:
           name: gzandea-db-jar
           path: core/build/libs/gzandea-db.jar
 
+
   upload-release-asset:
     name: Upload JAR to Existing Release
     runs-on: ubuntu-latest
