@@ -1,4 +1,4 @@
-name: Android CI
+name: Android CI 
 
 on:
   push:
@@ -52,7 +52,7 @@ jobs:
           release_name: Release ${{ github.ref }}  # Release 名字
 
       - name: Upload Release JAR
-        uses: actions/upload-release-asset@v1  # 使用适合的版本
+        uses: actions/upload-release-asset@v1.0.1  # 使用适合的版本
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
