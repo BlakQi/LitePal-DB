@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # 更新到最新版本
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3  # 更新到最新版本
         with:
           distribution: 'zulu'
           java-version: 11
@@ -29,7 +29,7 @@ jobs:
         run: ./gradlew :core:build
 
       - name: Upload JAR Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3  # 更新到 v3
         with:
           name: jar
           path: core/build/libs/gzandea-db.jar  # 确保路径正确
@@ -42,7 +42,7 @@ jobs:
 
     steps:
       - name: Download JAR from build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3  # 更新到 v3
         with:
           name: jar
 
@@ -51,7 +51,7 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: actions/create-release@v1  # 保持不变
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -59,7 +59,7 @@ jobs:
           release_name: Release ${{ github.ref_name }}  # Release 名字
 
       - name: Upload Release JAR
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v1  # 保持不变
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
