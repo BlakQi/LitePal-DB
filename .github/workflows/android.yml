@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,11 +23,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build and create JAR
-        run: ./gradlew aamakeJar
+      - name: Build and create JAR in core module
+        run: ./gradlew :core:aamakeJar
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v3
         with:
           name: gzandea-db-jar
-          path: build/libs/gzandea-db.jar
+          path: core/build/libs/gzandea-db.jar
