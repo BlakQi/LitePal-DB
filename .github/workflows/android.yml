@@ -28,10 +28,13 @@ jobs:
       - name: Build JAR
         run: ./gradlew :core:build
 
+      - name: List files in build directory
+        run: ls -R core/build/libs  # 列出构件目录以确认文件存在
+
       - name: Upload JAR Artifact
         uses: actions/upload-artifact@v3  # 更新到 v3
         with:
-          name: jar
+          name: jar  # 确保这个名称
           path: core/build/libs/gzandea-db.jar  # 确保路径正确
 
   release:
@@ -44,7 +47,7 @@ jobs:
       - name: Download JAR from build
         uses: actions/download-artifact@v3  # 更新到 v3
         with:
-          name: jar
+          name: jar  # 确保这个名称与上传时一致
 
       - name: Display structure of downloaded files
         run: ls -R
