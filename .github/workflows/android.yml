@@ -25,6 +25,12 @@ jobs:
       - name: Build and create JAR in core module
         run: ./gradlew :core:aamakeJar
 
+      - name: Upload JAR as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gzandea-db-jar
+          path: core/build/libs/gzandea-db.jar
+
       - name: Get release ID
         id: get_release
         run: |
