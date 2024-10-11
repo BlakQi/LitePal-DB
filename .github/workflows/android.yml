@@ -25,60 +25,29 @@ jobs:
       - name: Build and create JAR in core module
         run: ./gradlew :core:aamakeJar
 
-      - name: Check if JAR file exists
+      - name: Get release ID
+        id: get_release
         run: |
-          if [ -f core/build/libs/gzandea-db.jar ]; then
-            echo "JAR file exists."
-          else
-            echo "JAR file does not exist."
-            exit 1
-          fi
-
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gzandea-db-jar
-          path: core/build/libs/gzandea-db.jar
-
-  upload-release-asset:
-    name: Upload JAR to Existing Release
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Download JAR from build
-        uses: actions/download-artifact@v4
-        with:
-          name: gzandea-db-jar
-          path: gzandea-db.jar  # 下载并重命名为 gzandea-db.jar
-
-      - name: Check if JAR file exists after download
-        run: |
-          if [ -f gzandea-db.jar ]; then
-            echo "JAR file exists."
-          else
-            echo "JAR file does not exist."
-            exit 1
-          fi
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}  # 使用当前的 tag 名称
-          release_name: Release ${{ github.ref }}
-          body: New Release.
-          draft: false
-          prerelease: false
+          TAG_NAME="${{ github.ref }}"
+          API_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG_NAME#refs/tags/}"
+          RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$API_URL")
+          echo "Response: $RESPONSE"
+          RELEASE_ID=$(echo $RESPONSE | jq -r '.id')
+          UPLOAD_URL=$(echo $RESPONSE | jq -r '.upload_url' | sed 's/{?name,label}//')
+          echo "release_id=${RELEASE_ID}" >> $GITHUB_ENV
+          echo "upload_url=${UPLOAD_URL}" >> $GITHUB_ENV
 
       - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}  # 从创建发布步骤中提取上传 URL
-          asset_path: ./gzandea-db.jar  # 使用下载后的 JAR 文件路径
-          asset_name: gzandea-db.jar  # 上传时的文件名称
-          asset_content_type: application/java-archive  # 设置内容类型
+        if: env.release_id != 'null'
+        run: |
+          echo "Uploading to Release..."
+          JAR_FILE="core/build/libs/gzandea-db.jar"  # 确保这里的路径正确
+          if [ -f "$JAR_FILE" ]; then
+            curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/java-archive" \
+            --data-binary @"$JAR_FILE" \
+            "${{ env.upload_url }}?name=gzandea-db-${{ github.ref }}.jar"
+          else
+            echo "JAR file does not exist: $JAR_FILE"
+            exit 1
+          fi
