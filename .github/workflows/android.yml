@@ -23,7 +23,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build JAR in core module
-        run: ./gradlew :core:aamakeJar
+        run: ./gradlew :core:build
 
       - name: Get release by tag
         id: get_release
@@ -41,7 +41,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: core/build/libs/gzandea-db.jar
+          asset_path: core/build/libs/gzandea-db.jar  # 需要确保此路径正确
           asset_name: gzandea-db-${{ github.ref_name }}.jar  # 使用当前 tag 生成文件名
           asset_content_type: application/java-archive
         env:
