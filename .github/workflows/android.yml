@@ -50,10 +50,12 @@ jobs:
           JAR_FILE="core/build/libs/gzandea-db.jar"  # 确保这里的路径正确
           if [ -f "$JAR_FILE" ]; then
             # 使用自定义名称上传 JAR 文件
+            JAR_NAME="gzandea-db-${{ github.ref }}.jar"  # 使用 github.ref 直接
+            JAR_NAME="${JAR_NAME/refs\/tags\//}"  # 替换掉 refs/tags/ 前缀
             curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/java-archive" \
             --data-binary @"$JAR_FILE" \
-            "${{ env.upload_url }}?name=gzandea-db-${{ github.ref#refs/tags/ }}.jar"
+            "${{ env.upload_url }}?name=$JAR_NAME"
           else
             echo "JAR file does not exist: $JAR_FILE"
             exit 1
