@@ -26,7 +26,7 @@ jobs:
         run: ./gradlew :core:aamakeJar
 
       - name: Upload JAR artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # 更新为 v4
         with:
           name: gzandea-db-jar
           path: core/build/libs/gzandea-db.jar
@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Download JAR from build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4  # 更新为 v4
         with:
           name: gzandea-db-jar  # 确保这个名称与上传时一致
 
@@ -49,13 +49,15 @@ jobs:
           API_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG_NAME#refs/tags/}"
           RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$API_URL")
           echo "Response: $RESPONSE"
-          echo "::set-output name=release_id::$(echo $RESPONSE | jq '.id')"
-          echo "::set-output name=upload_url::$(echo $RESPONSE | jq -r '.upload_url' | sed 's/{?name,label}//')"
+          # 使用环境文件代替 set-output
+          echo "release_id=$(echo $RESPONSE | jq '.id')" >> $GITHUB_ENV
+          echo "upload_url=$(echo $RESPONSE | jq -r '.upload_url' | sed 's/{?name,label}//')" >> $GITHUB_ENV
 
       - name: Upload Release Asset
-        if: steps.get_release.outputs.release_id != 'null'
+        if: env.release_id != 'null'
         run: |
+          echo "Uploading to Release..."
           curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           -H "Content-Type: application/java-archive" \
           --data-binary @core/build/libs/gzandea-db.jar \
-          "${{ steps.get_release.outputs.upload_url }}?name=gzandea-db-${{ github.ref }}.jar"
+          "${{ env.upload_url }}?name=gzandea-db-${{ github.ref }}.jar"
