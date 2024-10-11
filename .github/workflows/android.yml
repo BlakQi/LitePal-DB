@@ -50,6 +50,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: gzandea-db-jar
+          path: gzandea-db-jar  # 指定下载后的文件名
 
       - name: Check if JAR file exists after download
         run: |
